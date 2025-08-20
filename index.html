@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Guess the AJR Song By Lyrics</title>
+<style>
+  body { font-family: Arial, sans-serif; background: #121212; color: #fff; text-align: center; padding: 50px; }
+  input, button { padding: 10px; font-size: 16px; margin-top: 10px; }
+  #result { margin-top: 20px; font-weight: bold; font-size: 18px; }
+  #score, #hints { margin-top: 10px; font-size: 16px; }
+</style>
+</head>
+<body>
+
+<h1>Guess the AJR Song By Lyrics</h1>
+<p id="lyrics"></p>
+<input type="text" id="guess" placeholder="Enter song name">
+<br>
+<button onclick="checkAnswer()">Submit</button>
+<button onclick="giveHint()">Get Hint</button>
+<p id="result"></p>
+<p id="score">Score: 0</p>
+<p id="hints">Hints used: 0 / 3</p>
+
+<script>
+const songs = [
+  { lyric: "I leave my house at three o'clock", title: "Yes I'm A Mess" },
+  { lyric: "Used to keep it cool", title: "Burn the House Down" },
+  { lyric: "All the big kids, they got drunk", title: "Sober Up" },
+  { lyric: "One sip, bad for me", title: "Weak" },
+  { lyric: "Don't you love it", title: "Way Less Sad" },
+  { lyric: "I’d rather be in Vegas than my very own home", title: "The Entertainment" },
+  { lyric: "But I’ll be there next time", title: "Come Hang Out" },
+  { lyric: "Put quinoa in my fridge still I’m not feeling grown", title: "Bang!" },
+  { lyric: "I know I gotta grow up sometime but I don’t think I’m ready yet", title: "Next Up Forever" },
+  { lyric: "Next time you see your folks at dinner", title: "Betty" },
+  { lyric: "Can it stay like this right here right now?", title: "A Dog Song" },
+  { lyric: "So I do what you tell me to and do it to death", title: "I Won't" },
+  { lyric: "When did all our problems get so small?", title: "Drama" },
+  { lyric: "Hey now hold up we were fun as hell", title: "The DJ Is Crying For Help" },
+  { lyric: "I’m an object in motion I’ve lost all emotion", title: "Inertia" },
+  { lyric: "One day maybe someday I’ll be so out of touch", title: "OK Overture" },
+  { lyric: "I got 7 haircuts and now my hair is all gone", title: "Bummerland" },
+  { lyric: "I been on dates bringing flowers, trying to be great for an hour", title: "My Play" },
+  { lyric: "I bet this instagrams a load of fun, it’s best to show the best of everyone", title: "Birthday Party" },
+  { lyric: "Life gives you lemons, at least it gave you something", title: "Break My Face" },
+  { lyric: "Right, I’ve done everything right", title: "Karma" },
+  { lyric: "You’ve been outside, been outside, so go ahead and do it one more time", title: "Finale" },
+  { lyric: "All my friends are vaping friends, their so good at making friends", title: "World's Smallest Violin" },
+  { lyric: "And if you called I don’t know what I’d say", title: "I'm Sorry You Went Crazy" }
+];
+
+let remainingSongs = [...songs];
+let score = 0;
+let hintsUsed = 0;
+let hintUsedThisSong = false;
+let current;
+
+// Normalize strings: lowercase, remove punctuation
+function normalize(str) {
+  return str.toLowerCase().replace(/[^a-z0-9\s]/g, '');
+}
+
+// Check if guess is correct
+function isCorrect(guess, answer) {
+  const guessNorm = normalize(guess);
+  const answerNorm = normalize(answer);
+  const answerWords = answerNorm.split(' ');
+
+  if(answerWords.length > 1) {
+    return answerWords.some(word => guessNorm.includes(word));
+  } else {
+    return guessNorm === answerNorm;
+  }
+}
+
+// Pick a random song from remainingSongs
+function getRandomSong() {
+  const index = Math.floor(Math.random() * remainingSongs.length);
+  return remainingSongs.splice(index, 1)[0];
+}
+
+// Load next song
+function nextSong() {
+  hintUsedThisSong = false;
+  if(remainingSongs.length === 0) {
+    document.getElementById("lyrics").textContent = "🎉 Quiz Over!";
+    document.getElementById("result").textContent = `Your final score: ${score} / 24`;
+    document.getElementById("guess").style.display = 'none';
+    document.querySelectorAll('button').forEach(btn => btn.style.display = 'none');
+  } else {
+    current = getRandomSong();
+    document.getElementById("lyrics").textContent = `"${current.lyric}"`;
+    document.getElementById("result").textContent = "";
+  }
+}
+
+// Check the user's answer
+function checkAnswer() {
+  const guess = document.getElementById("guess").value.trim();
+
+  if(isCorrect(guess, current.title)) {
+    document.getElementById("result").textContent = "🎉 Correct! Great job!";
+    score++;
+    nextSong();
+  } else {
+    document.getElementById("result").textContent = `❌ Wrong! The answer was "${current.title}"`;
+    nextSong();
+  }
+
+  document.getElementById("score").textContent = `Score: ${score}`;
+  document.getElementById("guess").value = "";
+}
+
+// Give hint
+function giveHint() {
+  if(hintsUsed >= 3) {
+    document.getElementById("result").textContent = "❌ No hints left!";
+    return;
+  }
+  if(hintUsedThisSong) {
+    document.getElementById("result").textContent = "❌ You already used a hint for this song!";
+    return;
+  }
+  hintsUsed++;
+  hintUsedThisSong = true;
+  const firstTwo = normalize(current.title).slice(0, 2);
+  document.getElementById("result").textContent = `Hint: Starts with "${firstTwo}"`;
+  document.getElementById("hints").textContent = `Hints used: ${hintsUsed} / 3`;
+}
+
+// Start the quiz
+nextSong();
+</script>
+
+</body>
+</html>
